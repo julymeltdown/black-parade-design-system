@@ -1,0 +1,71 @@
+.pretext-mermaid { min-width: 0; color: var(--ink); font-family: var(--font-body); }
+.pretext-heading { margin-bottom: 20px; max-width: 65ch; }
+.pretext-heading h2 { margin: 0 0 10px; font-family: var(--font-display); font-size: clamp(28px, 4vw, 40px); font-weight: 500; line-height: 1.15; letter-spacing: -.035em; }
+.pretext-heading > p:last-child { margin: 0; font-size: 16px; line-height: 1.65; }
+.pretext-context { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 12px; font-size: 11px; color: var(--muted); line-height: 1.5; }
+.pretext-context > span:first-child { font-family: var(--font-condensed); font-size: 12px; letter-spacing: .12em; }
+.pretext-space { width: 100%; min-width: 0; }
+.pretext-viewport { max-width: 100%; margin-inline: auto; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; }
+.pretext-diagram { min-width: 0; padding: 0; }
+.pretext-diagram svg { display: block; max-width: none; height: auto; margin-inline: auto; font-family: Inter, sans-serif; font-size: 16px; }
+.pretext-diagram svg .node { cursor: pointer; }
+.pretext-diagram svg .node rect { fill: transparent !important; stroke: transparent !important; }
+.pretext-diagram svg .node text { font-family: Inter, sans-serif !important; font-size: 16px !important; font-weight: 400 !important; letter-spacing: normal; word-spacing: normal; }
+.pretext-diagram svg .node.is-selected text,
+.pretext-diagram svg .node.is-selected tspan { fill: var(--blood) !important; }
+.pretext-diagram svg .node:focus { outline: none; }
+.pretext-diagram svg .node:focus-visible rect { stroke: var(--blood) !important; stroke-width: 2px !important; stroke-dasharray: 3 3; }
+.pretext-diagram[aria-busy='true'] { opacity: .7; }
+.pretext-state, .pretext-error { margin: 12px 0; font-size: 13px; line-height: 1.6; }
+.pretext-state { color: var(--muted); }
+.pretext-error { color: var(--blood); }
+.pretext-evidence { margin-top: 16px; }
+.pretext-evidence > summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 5px 0; list-style: none; cursor: pointer; font-size: 13px; font-weight: 550; line-height: 1.5; }
+.pretext-evidence > summary::-webkit-details-marker { display: none; }
+.pretext-evidence > summary::before { content: '+'; font-family: var(--font-body); font-size: 20px; font-weight: 400; }
+.pretext-evidence[open] > summary::before { content: '−'; }
+.pretext-evidence > summary > span { margin-left: auto; color: var(--muted); font-size: 11px; font-weight: 400; }
+.pretext-evidence > summary:focus-visible { outline: 2px solid var(--blood); outline-offset: 3px; }
+.pretext-evidence-content { display: grid; gap: 16px; padding-top: 12px; }
+.pretext-evidence-content > p { margin: 0; max-width: 70ch; font-size: 14px; line-height: 1.7; }
+.pretext-width-choices { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; }
+.pretext-width-choices > span { margin-right: 8px; color: var(--muted); }
+.pretext-width-choices button { min-width: 44px; min-height: 44px; padding: 8px 0; border: 0; background: transparent; color: var(--muted); font: inherit; cursor: pointer; }
+.pretext-width-choices button[aria-pressed='true'] { font-weight: 750; color: var(--ink); }
+.pretext-width-choices button:focus-visible { outline: 2px solid var(--blood); outline-offset: 2px; }
+.pretext-width-slider { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 12px; font-size: 12px; }
+.pretext-width-slider output { font-variant-numeric: tabular-nums; }
+.pretext-width-slider input { grid-column: 1 / -1; width: 100%; min-height: 44px; margin: 0; accent-color: var(--ink); }
+.pretext-comparison { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-height: 44px; font-size: 13px; line-height: 1.5; cursor: pointer; }
+.pretext-comparison input { width: 20px; height: 20px; margin: 0 6px 0 0; accent-color: var(--ink); }
+.pretext-comparison > span { color: var(--muted); font-size: 12px; }
+.pretext-measurements { min-width: 0; }
+.pretext-check { margin: 0 0 16px; font-size: 13px; line-height: 1.6; font-weight: 550; }
+.pretext-measurements dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 0; }
+.pretext-measurements dt { margin-bottom: 4px; font-size: 11px; color: var(--muted); line-height: 1.5; }
+.pretext-measurements dd { margin: 0; font-size: 15px; font-variant-numeric: tabular-nums; line-height: 1.5; }
+.pretext-font-note { margin: 16px 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
+.pretext-metrics-scroll { max-width: 100%; overflow-x: auto; }
+.pretext-metrics-scroll table { width: 100%; border-collapse: collapse; text-align: left; font-size: 11px; line-height: 1.6; }
+.pretext-metrics-scroll caption { text-align: left; margin-bottom: 8px; font-size: 12px; font-weight: 550; }
+.pretext-metrics-scroll th, .pretext-metrics-scroll td { padding: 6px 12px 6px 0; vertical-align: top; }
+.pretext-metrics-scroll td { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pretext-metrics-scroll th { font-weight: 500; }
+.pretext-metrics-scroll thead { color: var(--muted); }
+.pretext-source-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; }
+.pretext-source-heading h3 { margin: 0; font-family: var(--font-body); font-size: 13px; font-weight: 550; }
+.pretext-source { margin: 8px 0 0; padding: 12px 0; max-height: 260px; max-width: 100%; overflow: auto; color: var(--muted); background: transparent; font-size: 11px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+.pretext-source:focus-visible { outline: 2px solid var(--blood); outline-offset: 3px; }
+.pretext-version { margin: 14px 0 0; font-size: 11px; color: var(--muted); line-height: 1.8; }
+.pretext-version a { color: inherit; text-underline-offset: 3px; }
+@media (max-width: 639px) {
+  .pretext-context { margin-bottom: 8px; }
+  .pretext-evidence > summary { font-size: 12px; }
+  .pretext-evidence > summary > span { max-width: 90px; text-align: right; }
+  .pretext-measurements dl { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .pretext-metrics-scroll th, .pretext-metrics-scroll td { padding-right: 8px; }
+  .pretext-comparison > span { width: 100%; padding-left: 34px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pretext-diagram { transition: none; }
+}

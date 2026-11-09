@@ -1,0 +1,228 @@
+/*
+ * Reading styles include scoped adaptations of MIT-licensed source CSS:
+ * NotionX/react-notion-x, dd4c891997f6c42413623f6ea836c3ba34e042fb
+ * Copyright (c) 2026 Travis Fischer. docs/vendor/react-notion-x/LICENSE
+ * kepano/obsidian-minimal, 93321bdc23fc879966e1e3aa0cfeda77012f540f
+ * Copyright (c) 2020-2024 Steph Ango (@kepano). docs/vendor/obsidian-minimal/LICENSE
+ * yabwe/medium-editor, d113a74437fda6f1cbd5f146b0f2c46288b118ea
+ * Copyright Davi Ferreira and contributors. docs/vendor/medium-editor/LICENSE
+ * Exact files, selectors and modifications: docs/reading-provenance.md.
+ * Keep the complete notices when redistributing these adapted styles.
+ */
+
+.reading-page {
+  --reading-line-width: 65ch;
+  --reading-max-width: 100%;
+  --reading-leading: 1.8;
+  --reading-paragraph-gap: 1.25em;
+  padding-top: 32px;
+  padding-bottom: 48px;
+  color: var(--ink);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 18px;
+  line-height: var(--reading-leading);
+}
+
+.reading-page--embedded { padding-top: 24px; padding-bottom: 24px; }
+.reading-page--embedded .reading-header { margin-bottom: 12px; }
+.reading-page--embedded .reading-header > h2 { font-size: clamp(32px, 3.5vw, 44px); margin-bottom: 8px; }
+.reading-page--embedded .reading-deck { max-width: 65ch; font-size: 17px; line-height: 1.65; }
+.reading-essay,
+.reading-full-essay { width: 100%; }
+.reading-full-essay { margin-top: 12px; }
+.reading-full-essay > summary { width: fit-content; min-height: 44px; padding-block: 10px; font-family: var(--font-body); font-size: 14px; cursor: pointer; }
+.reading-full-essay[open] > summary { margin-bottom: 12px; }
+.reading-workbench { display: grid; gap: 20px; align-items: start; }
+.reading-workbench .reading-map-wrap { margin: 0; }
+.reading-picker { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin-bottom: 12px; font-family: var(--font-body); }
+.reading-picker label { color: var(--muted); font-size: 12px; }
+.reading-picker select { min-height: 44px; min-width: 0; max-width: 100%; padding: 8px 32px 8px 8px; border: 1px solid var(--muted); border-radius: 0; background: transparent; color: var(--ink); font-size: 16px; cursor: pointer; }
+.reading-focus { max-width: 65ch; min-width: 0; }
+.reading-focus .reading-eyebrow { margin: 0 0 4px; }
+.reading-page .reading-prose.reading-focus > h3 { margin: 0 0 12px; font-size: 24px; line-height: 1.35; }
+.reading-prose.reading-focus .reading-chapter-body { margin-bottom: 12px; }
+.reading-track-context { color: var(--muted); font-family: var(--font-body); font-size: 13px; line-height: 1.6; }
+.reading-header :is(h1, h2):focus { outline: 2px solid var(--ink); outline-offset: 4px; }
+
+/* Obsidian Minimal block-width.scss: readable-width blocks within a full canvas. */
+.reading-measure {
+  width: var(--reading-line-width);
+  max-width: var(--reading-max-width);
+  margin-inline: auto;
+}
+
+/* react-notion-x .notion-page-content and .notion-page-content-inner. */
+.reading-article {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.reading-page * { box-sizing: border-box; }
+.reading-prose { min-width: 0; }
+.reading-prose > :first-child { margin-top: 0; }
+.reading-prose strong { font-weight: 600; }
+.reading-prose p { margin: 0 0 var(--reading-paragraph-gap); }
+
+.reading-header { margin-bottom: 20px; }
+.reading-eyebrow,
+.reading-byline {
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.reading-eyebrow { margin: 0 0 8px; letter-spacing: .08em; text-transform: uppercase; }
+.reading-byline { margin: 12px 0 0; }
+.reading-header > h1,
+.reading-header > h2 {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-size: clamp(36px, 4.8vw, 60px);
+  font-weight: 500;
+  letter-spacing: -.04em;
+  line-height: 1.08;
+}
+.reading-deck { margin: 0; color: var(--muted); font-size: 1.1em; line-height: 1.65; }
+
+/* Medium Editor demo.css h2/h3 sizes; Minimal text.scss heading tracking.
+   Heading spacing follows Minimal's 2em rhythm, reduced for this compact reader. */
+.reading-prose :is(h2, h3, h4) {
+  max-width: 100%;
+  margin: 32px 0 12px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  letter-spacing: -.02em;
+  overflow-wrap: break-word;
+  scroll-margin-top: 24px;
+}
+.reading-prose > h2,
+.reading-page--embedded .reading-prose > h3 { font-size: 32px; line-height: 42px; }
+.reading-prose h3,
+.reading-prose h4 { font-size: 26px; line-height: 32px; }
+.reading-prose :is(h2, h3, h4):focus { outline: 2px solid var(--ink); outline-offset: 4px; }
+
+/* react-notion-x .notion-list-numbered and .notion-list li. */
+.reading-prose ol { list-style-type: decimal; padding-inline-start: 1.6em; margin-block: .6em; }
+.reading-prose li { padding: 6px 0; }
+.reading-prose a { color: var(--ink); text-decoration-thickness: 1px; text-underline-offset: .18em; }
+.reading-citation { font-family: var(--font-body); font-size: .75em; white-space: nowrap; }
+
+.reading-contents { margin-bottom: 24px; font-family: var(--font-body); font-size: 14px; }
+.reading-contents summary { width: fit-content; min-height: 44px; padding-block: 10px; cursor: pointer; }
+.reading-contents nav { margin-top: 0; }
+.reading-contents ol { margin: 0; padding-left: 24px; }
+.reading-contents li { padding: 0; }
+.reading-contents button {
+  display: inline-block;
+  min-height: 44px;
+  padding: 8px 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+/* react-notion-x asset-wrapper: responsive full-width image with real dimensions. */
+.reading-figure { display: flex; flex-direction: column; align-self: center; margin-block: 4px 24px; }
+.reading-figure img { display: block; width: 100%; height: auto; mix-blend-mode: multiply; }
+.reading-figure figcaption {
+  margin-top: 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.reading-chapters { margin-top: 12px; }
+.reading-chapter { margin: 0 0 20px; }
+.reading-prose .reading-chapter :is(h3, h4) { margin: 0 0 6px; font-size: 20px; line-height: 1.4; }
+.reading-chapter-select {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--ink);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.reading-chapter-number,
+.reading-selected-label { font-family: var(--font-body); font-size: 11px; font-weight: 400; line-height: 1.5; letter-spacing: .04em; }
+.reading-chapter-number { color: var(--muted); font-variant-numeric: tabular-nums; }
+.reading-selected-label { text-transform: uppercase; }
+.reading-chapter-body { white-space: pre-wrap; overflow-wrap: anywhere; }
+.reading-prose .reading-chapter p { margin-bottom: 0; }
+.reading-map-wrap { width: 100%; min-width: 0; margin-block: 0 24px; }
+.reading-watch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 8px 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.6;
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+  cursor: pointer;
+}
+.reading-prose .reading-inline-note {
+  margin-top: 4px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--muted);
+}
+.reading-sources { font-size: 16px; }
+.reading-sources span { display: block; font-size: 14px; color: var(--muted); }
+.reading-page :is(a, button, summary, select):focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+
+@media (min-width: 1000px) {
+  .reading-workbench { grid-template-columns: minmax(0, 1.9fr) minmax(260px, 1fr); gap: 28px; }
+  .reading-workbench > .reading-map-wrap { grid-column: 1; grid-row: 1; }
+  .reading-workbench > .reading-focus { grid-column: 2; grid-row: 1; }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .reading-contents button:hover,
+  .reading-chapter-select:hover { text-decoration: underline; text-underline-offset: 4px; }
+}
+
+@media (max-width: 639px) {
+  .reading-page { font-size: 17px; --reading-paragraph-gap: 1.15em; padding-top: 24px; padding-bottom: 32px; }
+  .reading-header { margin-bottom: 12px; }
+  .reading-header > h1,
+  .reading-header > h2 { font-size: 38px; }
+  .reading-deck { font-size: 18px; line-height: 1.65; }
+  .reading-prose > h2,
+  .reading-page--embedded .reading-prose > h3 { font-size: 25px; line-height: 1.4; margin-top: 28px; }
+  .reading-prose h3,
+  .reading-prose h4 { font-size: 23px; line-height: 1.4; }
+  .reading-contents { margin-bottom: 20px; }
+  .reading-figure { margin-bottom: 20px; }
+  .reading-prose .reading-chapter :is(h3, h4) { font-size: 19px; }
+  .reading-sources { font-size: 16px; }
+  .reading-page--embedded { padding-top: 20px; padding-bottom: 20px; }
+  .reading-page--embedded .reading-header > h2 { font-size: 32px; }
+  .reading-picker { gap: 4px; flex-direction: column; align-items: stretch; }
+  .reading-picker select { width: 100%; }
+  .reading-workbench { gap: 16px; }
+}

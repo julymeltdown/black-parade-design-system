@@ -1,0 +1,177 @@
+{
+  "date": "2026-11-09",
+  "timezone": "Asia/Seoul",
+  "version": "1.2.0",
+  "browser": "Managed Chromium, actual iframe CSS viewport",
+  "build": "passed",
+  "pretext_tests": {
+    "passed": 6,
+    "failed": 0
+  },
+  "archive_excerpt_geometry": [
+    {
+      "viewport": 320,
+      "available_width": 273,
+      "svg_width": 256,
+      "svg_height": 646,
+      "node_count": 5,
+      "clipped_labels": 0,
+      "fits_width": true,
+      "document_overflow": false,
+      "prose_font_px": 17,
+      "diagram_font_px": 16
+    },
+    {
+      "viewport": 360,
+      "available_width": 305,
+      "svg_width": 278,
+      "svg_height": 575.6,
+      "node_count": 5,
+      "clipped_labels": 0,
+      "fits_width": true,
+      "document_overflow": false,
+      "prose_font_px": 17,
+      "diagram_font_px": 16
+    },
+    {
+      "viewport": 390,
+      "available_width": 335,
+      "svg_width": 318,
+      "svg_height": 540.4,
+      "node_count": 5,
+      "clipped_labels": 0,
+      "fits_width": true,
+      "document_overflow": false,
+      "prose_font_px": 17,
+      "diagram_font_px": 16
+    },
+    {
+      "viewport": 430,
+      "available_width": 375,
+      "svg_width": 354,
+      "svg_height": 434.8,
+      "node_count": 5,
+      "clipped_labels": 0,
+      "fits_width": true,
+      "document_overflow": false,
+      "prose_font_px": 17,
+      "diagram_font_px": 16
+    },
+    {
+      "viewport": 640,
+      "available_width": 561,
+      "svg_width": 494,
+      "svg_height": 346.8,
+      "node_count": 5,
+      "clipped_labels": 0,
+      "fits_width": true,
+      "document_overflow": false,
+      "prose_font_px": 18,
+      "diagram_font_px": 16
+    },
+    {
+      "viewport": 768,
+      "available_width": 689,
+      "svg_width": 494,
+      "svg_height": 346.8,
+      "node_count": 5,
+      "clipped_labels": 0,
+      "fits_width": true,
+      "document_overflow": false,
+      "prose_font_px": 18,
+      "diagram_font_px": 16
+    },
+    {
+      "viewport": 900,
+      "available_width": 813,
+      "svg_width": 798,
+      "svg_height": 197.6,
+      "node_count": 5,
+      "clipped_labels": 0,
+      "fits_width": true,
+      "document_overflow": false,
+      "prose_font_px": 18,
+      "diagram_font_px": 16
+    },
+    {
+      "viewport": 1024,
+      "available_width": 595,
+      "svg_width": 494,
+      "svg_height": 346.8,
+      "node_count": 5,
+      "clipped_labels": 0,
+      "fits_width": true,
+      "document_overflow": false,
+      "prose_font_px": 18,
+      "diagram_font_px": 16
+    },
+    {
+      "viewport": 1180,
+      "available_width": 682,
+      "svg_width": 494,
+      "svg_height": 346.8,
+      "node_count": 5,
+      "clipped_labels": 0,
+      "fits_width": true,
+      "document_overflow": false,
+      "prose_font_px": 18,
+      "diagram_font_px": 16
+    },
+    {
+      "viewport": 1440,
+      "available_width": 852,
+      "svg_width": 814,
+      "svg_height": 180,
+      "node_count": 5,
+      "clipped_labels": 0,
+      "fits_width": true,
+      "document_overflow": false,
+      "prose_font_px": 18,
+      "diagram_font_px": 16
+    }
+  ],
+  "full_passage_proof": [
+    {
+      "space": 320,
+      "label_budget": 116,
+      "svg_width": 308,
+      "line_counts": [
+        13,
+        14,
+        13,
+        14,
+        13
+      ],
+      "new_preparations": 0,
+      "clipped_labels": 0
+    },
+    {
+      "space": 390,
+      "label_budget": 151,
+      "svg_width": 378,
+      "line_counts": [
+        8,
+        10,
+        8,
+        10,
+        9
+      ],
+      "new_preparations": 0,
+      "clipped_labels": 0
+    }
+  ],
+  "interactions": {
+    "node_to_prose": "passed",
+    "prose_to_node": "passed",
+    "keyboard_selection": "passed",
+    "shared_edit_english_korean_long_token": "passed",
+    "unwrapped_baseline": "passed",
+    "youtube_embed_and_native_controls": "loaded",
+    "desktop_top_player_geometry": "passed",
+    "uninterrupted_playback_across_navigation": "not_verified",
+    "physical_mobile_safari_android": "not_verified",
+    "authenticated_production_browser": "blocked_by_automatic_approval_review"
+  },
+  "typecheck": "passed",
+  "build_warning": "Mermaid optional chunks exceed the 500 kB advisory threshold; build succeeded."
+}

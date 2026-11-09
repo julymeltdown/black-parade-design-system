@@ -1,0 +1,133 @@
+/* Native iframe/container adaptation: saddamarbaa, MIT; see video-provenance.md.
+   The toolbar sits OUTSIDE the YouTube viewport, so it never masks video controls. */
+.archive-player {
+  --player-width: 360px;
+  position: fixed;
+  z-index: var(--layer-player, 30);
+  inset-inline-end: max(16px, env(safe-area-inset-right, 0px));
+  /* The 44px strip stays above the viewport without covering the page's top edge. */
+  inset-block-start: calc(60px + env(safe-area-inset-top, 0px));
+  inset-block-end: auto;
+  width: min(var(--player-width), calc(100vw - 32px));
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin: 0;
+  background: #080808;
+  color: #fff;
+  box-shadow: 0 5px 24px #0005;
+  isolation: isolate;
+}
+
+.archive-player--left {
+  inset-inline-start: max(16px, env(safe-area-inset-left, 0px));
+  inset-inline-end: auto;
+}
+
+.archive-player--expanded {
+  --player-width: min(800px, calc((100dvh - 112px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) * 16 / 9));
+}
+
+.archive-player__media {
+  flex: 1;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 200px;
+  overflow: hidden;
+  background: #080808;
+}
+
+.archive-player__media iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+  border: 0;
+}
+
+/* One small floating tool strip; no status bar, title row or footer. The strip
+   overlaps the page above the player, never YouTube's iframe or native controls. */
+.archive-player__actions {
+  position: absolute;
+  inset-block-end: 100%;
+  inset-inline-end: 0;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  background: #111;
+  color: #fff;
+}
+
+.archive-player__control {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  background: transparent;
+  text-decoration: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color 120ms ease;
+}
+
+.archive-player__control:hover { background: #ffffff26; }
+.archive-player__control:active { background: #ffffff40; }
+.archive-player__control:focus-visible { outline: 2px solid #fff; outline-offset: -4px; }
+.archive-player__control svg { pointer-events: none; }
+
+@media (hover: hover) and (pointer: fine) {
+  .archive-player__actions { opacity: .72; transition: opacity 120ms ease; }
+  .archive-player:hover .archive-player__actions,
+  .archive-player:focus-within .archive-player__actions { opacity: 1; }
+}
+
+@media (max-width: 600px) {
+  .archive-player,
+  .archive-player--left {
+    inset-inline-start: env(safe-area-inset-left, 0px);
+    inset-inline-end: env(safe-area-inset-right, 0px);
+    inset-block-start: auto;
+    inset-block-end: env(safe-area-inset-bottom, 0px);
+    width: auto;
+    box-shadow: 0 -3px 18px #0004;
+  }
+  .archive-player__move { display: none; }
+  .archive-player--expanded .archive-player__media {
+    aspect-ratio: auto;
+    height: min(60dvh, 440px);
+    flex-basis: min(60dvh, 440px);
+  }
+  /* Only the bottom-docked mobile player needs document-end clearance.
+     Desktop stays top-docked and never adds an empty footer-sized region. */
+  .app-shell.has-player .app-main {
+    padding-bottom: calc(var(--active-player-height, 225px) + 76px + env(safe-area-inset-bottom, 0px));
+  }
+  .app-shell.has-player .ds-toast {
+    bottom: calc(var(--active-player-height, 225px) + 76px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (max-height: 440px) and (orientation: landscape) {
+  .archive-player { --player-width: 356px; }
+  .archive-player--expanded { --player-width: min(620px, calc((100dvh - 76px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) * 16 / 9)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archive-player__control, .archive-player__actions { transition: none; }
+}
+
+@media (forced-colors: active) {
+  .archive-player { border: 1px solid CanvasText; }
+  .archive-player__actions { background: Canvas; color: CanvasText; }
+  .archive-player__control:focus-visible { outline-color: Highlight; }
+}

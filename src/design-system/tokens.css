@@ -1,0 +1,40 @@
+:root {
+  color-scheme: light;
+  --paper: #e9e6dd;
+  --paper-light: #f1eee6;
+  --ink: #1c1b18;
+  --muted: #67635b;
+  --line: #b6b0a3;
+  --blood: #782f2d;
+  --font-display: 'Bodoni Moda', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-condensed: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --radius: 0px;
+  --touch: 44px;
+  --control: 48px;
+  --motion-fast: 120ms;
+  --motion-base: 180ms;
+  --motion-slow: 240ms;
+  --ease-out: cubic-bezier(.2, .65, .3, 1);
+  --focus-width: 2px;
+  --focus-offset: 3px;
+  --layer-sticky: 20;
+  --layer-player: 30;
+  --layer-toast: 70;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-base: 0ms;
+    --motion-slow: 0ms;
+  }
+}
