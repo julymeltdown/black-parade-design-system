@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.sites-runtime/
+.sites-pnpm-store/
+.pnpm-store/
+*.log
+.DS_Store
+artifacts/
+.openai/
+.env
+.env.*
+!.env.example
