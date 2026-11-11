@@ -114,6 +114,7 @@
 .reading-contents summary { width: fit-content; min-height: 44px; padding-block: 10px; cursor: pointer; }
 .reading-contents nav { margin-top: 0; }
 .reading-contents ol { margin: 0; padding-left: 24px; }
+.reading-contents .pt-outline ol { padding: 0; }
 .reading-contents li { padding: 0; }
 .reading-contents button {
   display: inline-block;

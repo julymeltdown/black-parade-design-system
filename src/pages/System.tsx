@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowDownToLine, ArrowRight, ArrowUpRight, Bookmark, Check, ChevronRight, Copy, Disc3, Film, MessageSquare, Play, Smartphone } from 'lucide-react';
 import { Button, Dialog, EmptyState, IconButton, MediaCard, SearchField, SectionHeading, TabBar, Tag, TextArea, TextField } from '../design-system';
 import { sources } from '../data';
+import { ComponentGallery } from './ComponentGallery';
+import { PretextLab } from './PretextLab';
 
 const swatches = [
   { label: 'Paper', token: '--paper', color: '#E9E6DD' },
@@ -14,8 +16,24 @@ const swatches = [
 const codeExample = `import { Button, Dialog, TextField } from './design-system';\n\n<Button variant="primary" onClick={() => setOpen(true)}>\n  Leave your mark\n</Button>\n<Dialog open={open} onClose={() => setOpen(false)} title="Your note.">\n  <TextField label="Title" placeholder="A little something…" />\n</Dialog>`;
 
 interface Props { grain: number; setGrain: (value: number) => void; notify: (message: string) => void; }
+function sectionFromHash() {
+    if (typeof window === 'undefined') return 'foundations';
+    const requested = new URLSearchParams(window.location.hash.split('?')[1] || '').get('section');
+    return ['foundations', 'components', 'pretext', 'mobile', 'references'].includes(requested || '') ? requested! : 'foundations';
+}
 export function SystemPage({ grain, setGrain, notify }: Props) {
-  const [section, setSection] = useState('foundations');
+  const [section, setSection] = useState(sectionFromHash);
+  useEffect(() => {
+    const update = () => setSection(sectionFromHash());
+    window.addEventListener('hashchange', update);
+    return () => window.removeEventListener('hashchange', update);
+  }, []);
+  const changeSection = (value: string) => {
+    setSection(value);
+    const next = new URL(window.location.href);
+    next.hash = `system?section=${value}`;
+    window.history.replaceState(null, '', next);
+  };
   const [modal, setModal] = useState(false);
   const [saved, setSaved] = useState(false);
   const [query, setQuery] = useState('');
@@ -26,8 +44,8 @@ export function SystemPage({ grain, setGrain, notify }: Props) {
   const [width, setWidth] = useState(390);
   const copy = async (text: string) => { try { await navigator.clipboard.writeText(text); notify('Copied to clipboard.'); } catch { notify('Clipboard unavailable. Select and copy the visible value.'); } };
 
-  return <div className="page system-page"><header className="page-heading system-heading"><div><p className="micro-label">04 / THE DESIGN SYSTEM · V1.2</p><h1>Ink. Paper.<br/>Structure.</h1><p>A visual language for a world that refuses to fade.</p></div><a className="download-link" href="/downloads/design.md" download><ArrowDownToLine size={18}/>design.md<span>THE COMPLETE SPECIFICATION</span></a></header>
-    <TabBar label="Design system sections" items={[{ id: 'foundations', label: 'Foundations' }, { id: 'components', label: 'Components' }, { id: 'mobile', label: 'Mobile' }, { id: 'references', label: 'References', count: sources.length }]} value={section} onChange={setSection}/>
+  return <div className={`page system-page${section === 'components' || section === 'pretext' ? ' system-page--catalog' : ''}`}><header className="page-heading system-heading"><div><p className="micro-label">04 / THE DESIGN SYSTEM · V1.3</p><h1>Ink. Paper.<br/>{' '}Structure.</h1><p>A visual language for a world that refuses to fade.</p></div><a className="download-link" href="/downloads/design.md" download><ArrowDownToLine size={18}/>design.md<span>THE COMPLETE SPECIFICATION</span></a></header>
+    <TabBar label="Design system sections" items={[{ id: 'foundations', label: 'Foundations' }, { id: 'components', label: 'Components', count: 28 }, { id: 'pretext', label: 'Pretext', count: 7 }, { id: 'mobile', label: 'Mobile' }, { id: 'references', label: 'References', count: sources.length }]} value={section} onChange={changeSection}/>
 
     {section === 'foundations' && <div className="system-content"><section><SectionHeading eyebrow="01 / COLOR" title="Six colors. One world."/><p className="system-intro">Worn paper carries the content. Ink carries the hierarchy. Oxblood is reserved for a deliberate point of emphasis.</p><div className="color-swatches">{swatches.map(swatch => <button className="swatch" key={swatch.token} onClick={() => copy(swatch.color)} aria-label={`Copy ${swatch.label} ${swatch.color}`}><span className="swatch-color" style={{ background: swatch.color }}/><strong>{swatch.label}<Copy size={13}/></strong><code>{swatch.color}</code><small>{swatch.token}</small></button>)}</div></section>
       <section className="type-specimen"><SectionHeading eyebrow="02 / TYPOGRAPHY" title="The voice of the archive."/><div className="type-row"><div className="micro-label">BODONI MODA<br/><span>DISPLAY / 700–900</span></div><div className="specimen-display">Beautifully<br/>unquiet.</div></div><div className="type-row"><div className="micro-label">INTER<br/><span>BODY / 400–600</span></div><div className="specimen-body"><strong>For everyone who found a little of themselves in a record.</strong><p>Keep the drama in the headlines. Give the stories room to breathe. Body text remains clear, quiet and comfortable to read.</p></div></div><div className="type-row"><div className="micro-label">BARLOW CONDENSED<br/><span>LABELS / 500–600</span></div><div className="specimen-condensed">VOLUME 003 / INDEPENDENT ARCHIVE / EST. 2006</div></div></section>
@@ -40,6 +58,9 @@ export function SystemPage({ grain, setGrain, notify }: Props) {
       <div className="component-specimen"><div className="specimen-label"><h3>Words & states</h3><code>TextField · TextArea · SearchField</code></div><form className="sample-form" onSubmit={event => { event.preventDefault(); setValidated(true); if (formValue.trim().length >= 3) notify('Sample form submitted. Nothing was sent.'); }} noValidate><SearchField value={query} onChange={setQuery} label="Search the component sample" placeholder="Search the component sample…"/>{query && <p className="sample-search-result" role="status">Showing the sample query: “{query}”</p>}<TextField label="A name for your collection" placeholder="Songs that stayed" value={formValue} onChange={event => { setFormValue(event.target.value); setValidated(false); }} error={validated && formValue.trim().length < 3 ? 'Please enter at least three characters.' : undefined}/><TextArea label="A note to your future self" placeholder="Remember how this felt…" value={formNote} onChange={event => setFormNote(event.target.value)} rows={3}/><Button type="submit">Try validation <ArrowRight size={16}/></Button></form></div>
       <div className="component-two-col"><div><h3 className="component-small-heading">MediaCard</h3><MediaCard title="Welcome to the Black Parade" subtitle="16:9 media · 44px minimum controls" image="/assets/parade-film.png" duration="5:15" onClick={() => setModal(true)}/></div><div><h3 className="component-small-heading">EmptyState</h3><EmptyState title="A page unwritten." description="An empty state tells you what belongs here and gives you a useful next step." action={<Button variant="secondary" onClick={() => setModal(true)}>Make the first mark</Button>}/></div></div>
       <div className="code-specimen"><header><span>REACT + TYPESCRIPT</span><IconButton label="Copy React example" onClick={() => copy(codeExample)}><Copy size={17}/></IconButton></header><pre><code>{codeExample}</code></pre></div></section></div>}
+
+    {section === 'components' && <ComponentGallery/>}
+    {section === 'pretext' && <PretextLab/>}
 
     {section === 'mobile' && <div className="system-content"><section><SectionHeading eyebrow="06 / SMALL SCREENS, FULL EXPERIENCE" title="Made for your hand."/><p className="system-intro">The same components reflow. The Index opens a plain-text contents view, forms remain legible, and content gets the full canvas.</p><div className="mobile-lab"><div className="mobile-preview-controls"><p className="micro-label">CONSTRAINED COMPONENT PREVIEW</p><TabBar label="Preview content width" items={[{ id: '320', label: '320' }, { id: '390', label: '390' }, { id: '430', label: '430' }]} value={String(width)} onChange={value => setWidth(Number(value))}/><p className="small-note">This specimen demonstrates reflow. The responsive lab also runs the complete site at ten viewport widths.</p></div><div className="mobile-preview" style={{ width }}><header><span>PARADE ARCHIVE</span><span>Index +</span></header><div className="preview-body"><span className="micro-label">THE THIRD STUDIO ALBUM</span><h3>THE BLACK<br/>PARADE.</h3>{['The End.', 'Dead!', 'Welcome to the Black Parade'].map((title, i) => <div className="preview-track" key={title}><span>{String(i + 1).padStart(2, '0')}</span><strong>{title}</strong><ChevronRight size={18}/></div>)}<Button onClick={() => setModal(true)}>Open mobile sheet <ArrowRight size={16}/></Button></div></div></div>
       <div className="mobile-rules"><article><span>44 × 44</span><h3>Every target has room.</h3><p>Icons can be small. Their interactive area stays generous. Hover never reveals an essential action.</p></article><article><span>16px</span><h3>Forms stay readable.</h3><p>Inputs use at least 16px text. Native zoom remains available. Labels stay visible after typing.</p></article><article><span>100dvh</span><h3>The viewport can change.</h3><p>Sheets use dynamic viewport limits and internal scrolling, with safe-area padding for fixed controls.</p></article><article><span>0ms</span><h3>Less motion means less.</h3><p>System reduced-motion preferences remove spatial transitions. The paper stays still for everyone.</p></article></div>

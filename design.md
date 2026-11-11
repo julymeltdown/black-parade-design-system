@@ -1,10 +1,10 @@
 # The Parade Archive — Design System
 
-Version 1.2 · 9 November 2026 · Open canvas, linked reader and compact media · React + TypeScript · Responsive web
+Version 1.3 · 11 November 2026 · 28 foundation components · 7 Pretext text components · React + TypeScript · Responsive web
 
 This document defines the visual and interaction contract for **The Parade Archive**, an independent example application inspired by My Chemical Romance's third album, *The Black Parade*. “Welcome to the Black Parade” identifies the song and related film; it is not used as the album's title.
 
-The system must support two equally important experiences: an expressive album archive and an everyday interface that remains easy to read, navigate and operate on a phone. The reference study and asset provenance are in [docs/references.md](docs/references.md); actual licensed reader CSS adaptations are documented in [docs/reading-provenance.md](docs/reading-provenance.md). Rules below describe the intended contract. Verification is recorded separately; a requirement here is not a claim that a browser test passed.
+The system must support two equally important experiences: an expressive album archive and an everyday interface that remains easy to read, navigate and operate on a phone. The reference study and asset provenance are in [docs/references.md](docs/references.md); actual licensed reader CSS adaptations are documented in [docs/reading-provenance.md](docs/reading-provenance.md). Rules below describe the intended contract. Current checks belong to [docs/verification-v1.3.md](docs/verification-v1.3.md); the earlier [verification record](docs/verification.md) and original screenshots are explicitly historical v1.2 evidence. A requirement here is not a claim that a browser test passed.
 
 ## 1. Art direction
 
@@ -70,6 +70,8 @@ A suggested display range is `clamp(3.4rem, 8.5vw, 9.5rem)`; composition may req
 
 Body paragraphs should usually remain within 65–72 characters per line. Form controls use at least 16px text on mobile. Long titles wrap in reading views; compact docks may truncate while retaining the full accessible name. Do not use condensed uppercase styling for paragraphs or error explanations. Font loading must have local fallbacks and must not leave text invisible.
 
+Pretext specimens use explicit `TextStyle` contracts for both Canvas measurement and painted DOM text. Their default styles are 40/46px Bodoni Moda for balanced headings, 18/30px bundled Source Serif 4 for measured reading compositions and 16/26px Inter for interfaces. The named, loaded serif keeps Canvas and DOM on the same font. These specimen defaults do not replace the Georgia longform reader's 17/18px, 1.8-leading contract. The bundled Noto Sans KR Variable family supplies the declared Korean fallback. Request fonts with the actual text so Unicode-range subsets load before preparation; do not measure with one font and render with another.
+
 The dedicated reader uses a stricter 65ch measure. Its paragraph gaps are 1.25em desktop and 1.15em mobile, with sober Inter subheadings. Body text may retain native serif rendering while the surrounding archive uses Inter. Do not increase heading scale or margins simply because content is long.
 
 ## 3. Paper and imagery
@@ -123,9 +125,9 @@ The embedded reader starts with a compact heading, a passage selector, the live 
 
 The essay distinguishes cited album facts from editorial interpretation. Native `<details>` provides in-flow contents and full-essay disclosures; neither becomes a sidebar. Prose, sources and a reference photograph stay within a readable measure. The graph can occupy a wider area without stretching the paragraphs. The official video action uses the shared player so reading and playback can continue together.
 
-Reader passages and the diagram share the same `CHAPTERS` data from `src/lib/pretext-mermaid.ts`. The IDs are `curtain`, `memory`, `loss`, `theatre` and `resolve`; `trackIds` connects each passage with archive tracks. Archive supplies the controlled chapter selection: opening a track selects its chapter, and choosing a chapter keeps the currently open track when it belongs to that chapter or selects the chapter's first track. Passage controls and graph nodes use this same selection. Default nodes use a short literal excerpt from that same body; a full-passage label mode is available in the evidence disclosure. The reader always shows the complete paragraph.
+Reader passages and the diagram share the same `CHAPTERS` data from `src/lib/pretext-mermaid.ts`. The IDs are `curtain`, `memory`, `loss`, `theatre` and `resolve`; `trackIds` connects each passage with archive tracks. Archive supplies the controlled chapter selection: opening a track selects its chapter, and choosing a chapter keeps the currently open track when it belongs to that chapter or selects the chapter's first track. Passage controls and graph nodes use this same selection. A default node shows its complete title plus up to **three measured body lines**, reserving the measured ellipsis width at the final line. Its body is a source prefix from that same paragraph, not an independently written summary. The evidence disclosure offers full-passage labels. The reader always shows the complete paragraph.
 
-`PretextMermaid` receives `selectedId`, `onSelect`, `textOverrides`, `onTextChange` and `compact`. Editing a passage updates both its readable text and node label for the current session. Pretext prepares and lays out the exact label text before Mermaid renders; width changes must produce measurable line-layout changes. The component exposes inspectable layout evidence and the generated Mermaid source. Diagram edges express an explicitly labeled editorial reading, not official chronology.
+`PretextMermaid` receives `selectedId`, `onSelect`, `textOverrides`, `onTextChange` and `compact`. Editing a passage updates both its readable text and node label for the current session. Its editor uses `MeasuredTextArea`. The shared engine prepares the original title and complete body independently; both handles survive width changes. Clamp layout derives the current source prefix from the body handle without preparing a width-specific substring. Pretext's actual line text and widest line feed the generated Mermaid labels and minimum node width. The component exposes inspectable layout evidence and the generated source. Diagram edges express an explicitly labeled editorial reading, not official chronology.
 
 Diagram text must remain readable on a phone. Change layout direction and line wrapping according to available width; do not shrink the entire diagram until labels become tiny. Keep keyboard-operable node selection, a textual counterpart and a useful error state. Mermaid's actual generated node IDs include the render-ID prefix; the adapter uses that prefix to find and bind chapter nodes rather than assuming an unprefixed ID. See [docs/pretext-mermaid-proof.md](docs/pretext-mermaid-proof.md) for the adapter and recorded Canvas checks. The final browser SVG fit and linkage verification remain separate checks; a source fix or passing Canvas test does not certify the rendered browser result.
 
@@ -151,9 +153,13 @@ Replies appear in a readable hierarchy using indentation, author labels and spac
 
 LocalStorage may persist votes, saves and locally created posts. Recover gracefully if storage is unavailable or corrupt. Sample counts are demonstration data, not live membership or verified engagement.
 
+Version 1.3 uses `MeasuredTextArea` for composing and replying, and `TextExcerpt` for post previews. A preview keeps an explicit expansion action whenever it truncates content. Measured height must preserve native editing, selection and paste. The [current verification record](docs/verification-v1.3.md) records which integration flows were exercised.
+
 ### System
 
 The System destination is a usable specimen sheet. Show color values, type roles, spacing and live component states. A reader should be able to focus, press, toggle, expand and open the same components used elsewhere. Label demonstrations clearly; do not let a preview action unexpectedly alter community data.
+
+`/#system?section=components` contains the original specimens and the expanded gallery of 28 foundation components. The sixteen new exports demonstrate native selection, form controls, disclosures, pagination, progress, contributor identity, notices, copying and loading. `/#system?section=pretext` contains seven reusable text compositions with editable content, width presets, type presets, English/Korean/mixed/bidirectional samples and inspectable cache counters. Keep both on the same continuous canvas: no surrounding dashboard panels, new navigation bars or section rules.
 
 ## 5. Responsive contract
 
@@ -174,7 +180,7 @@ Use `viewport-fit=cover`, responsive viewport width and an initial scale of one.
 
 ## 6. Reusable component contract
 
-The `src/design-system/` module owns tokens, primitives and their shared CSS. `tokens.ts` and `tokens.css` define foundations; `components.tsx` and `components.css` implement primitives; `index.ts` is the public entry point. Page code owns content and feature state. Native HTML attributes and event handlers should pass through reusable components; an accessible name must not be lost when a wrapper is introduced.
+The `src/design-system/` module owns 28 foundation components, tokens and shared CSS. `tokens.ts` and `tokens.css` define foundations; `components.tsx`/`components.css` retain the original twelve; `extended.tsx`/`extended.css` add sixteen. `index.ts` is their public entry point and imports all three stylesheets. The separate `src/pretext/` entry point exports seven text compositions and their styles. Page code owns content and feature state. Native HTML attributes and event handlers should pass through reusable components; an accessible name must not be lost when a wrapper is introduced.
 
 | Component family | Required structure and behavior |
 | --- | --- |
@@ -206,9 +212,23 @@ Do not make an entire row a button containing more buttons or links. Keep the ex
 | `EmptyState` | `title`, `description`, optional `action` |
 | `MediaCard` | `title`, `subtitle`, `image`, optional `duration`, `onClick` |
 | `Toast` | `message`, `onDismiss` |
+| `Checkbox`, `Switch` | Controlled `checked`, `onCheckedChange(boolean)`, required `label`; native input semantics |
+| `RadioGroup` | `label`, `options`, controlled `value`, `onValueChange(string)`; native fieldset and radios |
+| `SelectField` | `label`, `options`, controlled `value`, `onValueChange(string)`; native single select |
+| `RangeField` | `label`, controlled `value`, `onValueChange(number)`; `min`, `max`, `step`, optional `formatValue` |
+| `Accordion` | `items`; controlled `openIds`/`onOpenChange` or `defaultOpenIds`; native details/summary |
+| `Breadcrumbs` | `items`, optional nav `label`; last item exposes the current page |
+| `Pagination` | One-based `page`, `pageCount`, `onPageChange(number)`; bounded pages and disabled ends |
+| `Progress` | `label`, optional `value`, `max`; native determinate or indeterminate progress |
+| `Avatar`, `AvatarGroup` | A named identity with optional image and initials fallback; grouped `people`/`max` |
+| `Notice` | `title`, `children`, `tone`, optional `onDismiss`; status/alert semantics |
+| `CodeBlock`, `CopyButton` | Escaped `code` or copy `text`; visible copy feedback and failure recovery |
+| `Skeleton`, `Kbd` | Static labeled loading placeholders or semantic keyboard labels |
 | `tokens` | Readonly `color`, `font`, `space`, `radius`, `target`, `motion`, `breakpoint`, `layer` |
 
-Feature-level exports remain outside the primitive module. `ReadingPage` accepts `watch(id)`, optional `selectedId: ChapterId`, `onSelect(id)` and `embedded`. `PretextMermaid` owns text-layout and diagram evidence; its shared chapter data connects the reading feature to the archive. These components must not introduce a dependency from base controls into page data.
+The [component API](docs/component-api.md) describes all import surfaces. The [extended-component reference](docs/extended-components.md) gives exact props, types, state rules and examples for the sixteen additions. These are functional contracts: pagination clamps invalid bounds, indeterminate progress omits value, an image failure reveals initials, and denied clipboard access produces visible feedback. Do not implement their states as inert decorative specimens.
+
+Feature-level exports remain outside the primitive module. `ReadingPage` accepts `watch(id)`, optional `selectedId: ChapterId`, `onSelect(id)` and `embedded`. `PretextMermaid` owns text-layout and diagram evidence; its shared chapter data connects the reading feature to the archive. Reading uses `PassageOutline` for its in-flow contents. These compositions must not introduce a dependency from base controls into page data.
 
 `TabBar` is a selection/filter group using `aria-pressed`, with ArrowLeft/ArrowRight/Home/End support; its name does not make it an ARIA tablist. Application destinations remain links. Track rows, feed entries and the video dock are product compositions built on these primitives, not additional exported library components.
 
@@ -233,6 +253,44 @@ export function NoteExample() {
 ```
 
 This example keeps text in component state only. Persistence and submission belong to the calling feature and must be labeled according to their actual behavior.
+
+### Pretext text compositions
+
+| Export | Design and semantic contract |
+| --- | --- |
+| `BalancedHeading` | Tightens measured width without shrinking type or changing the initial line count; renders one native heading |
+| `TextExcerpt` | Paints selectable planned lines and a measured ellipsis inside one paragraph; a real expansion button restores complete native text |
+| `FlowText` | Continues source cursors through changing line widths around an inset; narrow or bidirectional text uses ordinary document flow |
+| `MeasuredTextArea` | Uses pre-wrap metrics for native textarea height, retains caret/selection, includes final newline space and row limits |
+| `RichInlineText` | Uses rich-inline preparation and range materialization for mixed fonts, source offsets, measured spaces and atomic tags |
+| `MeasuredTextList` | Indexes actual paragraph heights; ordinary full DOM is the default, windowing is opt-in with a complete-content mode |
+| `PassageOutline` | Sizes wrapped native links from their measured text; keeps order, current-location semantics and 44px targets |
+
+Use a shared `TextStyle` for measurement and rendering. In addition to `font` and `lineHeight`, it controls `letterSpacing`, `whiteSpace` and `wordBreak`. Ordinary prose remains native DOM text wherever possible; explicit line spans serve measured excerpts, changing line widths and rich fragments. Collapsed `TextExcerpt` paints its fitted lines within one paragraph so the shortened tail does not rewrap into an extra line. Expanded content returns to the complete native paragraph. Do not convert a reading page into a canvas image.
+
+The plain-text preparation cache is a shared **512-entry LRU**. Keys contain original text and shaping inputs: font, letter spacing, whitespace and word-break policy. **Width and line height are excluded**. They change line layout and box height, so they must not trigger fresh Canvas preparation. The original complete body handle also drives Mermaid excerpts across widths. Rich-inline content holds its own memoized prepared handle and is not counted by the plain-text cache counters.
+
+The shared browser lifecycle loads each font with the actual text, then tracks changes in loaded font faces/subsets, document language and device pixel ratio. An actual change invalidates both prepared entries and Pretext's internal caches, increments an environment revision and requests fresh layouts. Width-only resize uses the existing handles. Global locale follows the document's `lang`; independent component-local locale mutations are not supported.
+
+Components expose an explicit `data-pretext-state` of `measured` or `native`. Native content remains available while fonts or content width are unavailable, on a measurement failure, and when the composition deliberately preserves browser paragraph ordering. Arabic, Hebrew and bidi-control text must use the native path in manual-flow/truncation specimens. A measured state records an available plan, not a browser-fit or accessibility certification. Rendered SVG and positioned-line containment are separate checks.
+
+```tsx
+import { useState } from 'react';
+import { MeasuredTextArea, TextExcerpt, INTERFACE_TEXT } from './pretext';
+
+export function ListeningDraft() {
+  const [text, setText] = useState('A memory becomes a shared procession.');
+  return <>
+    <MeasuredTextArea label="Listening note" value={text} onChange={setText}
+      minRows={3} maxRows={8} maxLength={2000} />
+    <TextExcerpt text={text} textStyle={INTERFACE_TEXT} maxLines={3} />
+  </>;
+}
+```
+
+The [Pretext component reference](docs/pretext-components.md) covers props and presentation modes; the [layout-engine guide](docs/pretext-layout-engine.md) covers preparation, grapheme-aware clamping, flow exclusions and measured indexes. [Pretext provenance](docs/pretext-provenance.md) records the upstream patterns and permissions.
+
+Font readiness has an eight-second bounded wait. A delayed or failed request leaves the complete native text readable and exposes an error in the Pretext lab. Actual subset loading may still finish later and invalidate the environment for another measurement attempt. The timeout must never be treated as successful font measurement.
 
 ### Shared state matrix
 
@@ -281,6 +339,8 @@ The following checks are **required verification targets**, not recorded passes:
 9. Record physical iOS/Android keyboard, safe-area and touch checks separately from browser emulation.
 10. Verify reader contents navigation, 65ch measure, compact spacing, chapter/track selection in both directions, edited-text synchronization and uninterrupted player state while reading. Inspect the 62/64px track targets and 17/18px note body rather than accepting earlier stylesheet declarations as the final cascade.
 11. Change graph width and text; compare Pretext line counts with the generated Mermaid source and final SVG bounds. Record actual results, including any fallback or fit failure.
+12. Exercise all sixteen new foundation components with keyboard and pointer: mixed checkbox, switch, native radio/select/range, exclusive/multiple disclosure, empty/end pagination, indeterminate progress, avatar fallback, notice dismissal, clipboard failure and static loading. Observe the final mobile targets and input font sizes.
+13. Warm the shared text cache and resize the lab without changing text or type: distinguish layout passes from new preparation. Change line height without adding a prepared entry; change source, font, locale and device pixel ratio and inspect the correct invalidation behavior. Test long words, hard breaks, Korean, combining marks, emoji clusters and native bidi fallbacks. Exercise list resize anchoring and complete-content mode.
 
 When extending the system, first reuse a token or composition. Add a new component only when its semantics or repeated behavior justify one. Record new states in the live System page and update this contract when a user-facing behavior changes.
 

@@ -1,13 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import type { KeyboardEvent, MouseEvent } from 'react';
 import { Check, Copy } from 'lucide-react';
 import '@fontsource/inter/400.css';
-import { Button, TextArea } from '../design-system';
+import { Button } from '../design-system';
+import { MeasuredTextArea } from '../pretext';
 import {
   CHAPTERS, PRETEXT_FONT, PRETEXT_LINE_HEIGHT, buildMermaidPlan,
   ensurePretextFont, renderMermaidPlan, verifyMermaidSvg,
 } from '../lib/pretext-mermaid';
 import type { ChapterId, MermaidPlan, SvgVerification } from '../lib/pretext-mermaid';
+import { getTextEnvironmentRevision, subscribeTextEnvironment } from '../lib/pretext-fonts';
 import './pretext-mermaid.css';
 
 export interface PretextMermaidProps {
@@ -27,6 +29,7 @@ function markSelection(host: HTMLDivElement | null, selectedId: ChapterId) {
 }
 
 export function PretextMermaid({ selectedId, onSelect, textOverrides = {}, onTextChange, compact = false }: PretextMermaidProps) {
+  const fontRevision = useSyncExternalStore(subscribeTextEnvironment, getTextEnvironmentRevision, () => 0);
   const [localSelection, setLocalSelection] = useState<ChapterId>('memory');
   const selected = selectedId ?? localSelection;
   const selectedRef = useRef(selected);
@@ -92,7 +95,7 @@ export function PretextMermaid({ selectedId, onSelect, textOverrides = {}, onTex
       }
     }, 90);
     return () => { current = false; clearTimeout(timeout); cancelAnimationFrame(frame); };
-  }, [chapters, frameWidth, pretextEnabled, fullLabels]);
+  }, [chapters, frameWidth, pretextEnabled, fullLabels, fontRevision]);
 
   useEffect(() => { markSelection(host.current, selected); }, [selected]);
   useEffect(() => { if (!copied) return; const timeout = setTimeout(() => setCopied(false), 2000); return () => clearTimeout(timeout); }, [copied]);
@@ -139,17 +142,17 @@ export function PretextMermaid({ selectedId, onSelect, textOverrides = {}, onTex
     <details className="pretext-evidence">
       <summary>How the text shapes this map <span>{plan ? `${plan.canvasWidth}px · ${plan.direction === 'TB' ? 'vertical' : 'horizontal'}` : 'Pretext + Mermaid'}</span></summary>
       <div className="pretext-evidence-content">
-        <p>Each node shows its title and the first six words of the same readable passage. Pretext measures that exact excerpt; its line breaks and measured width shape Mermaid’s nodes. Full-passage mode lets you inspect all of the words.</p>
+        <p>Each node shows its title and up to three measured lines from the same passage. Pretext reserves room for the ellipsis and continues at grapheme boundaries. The original title and body preparations are reused as the width changes. Full-passage mode shows every word.</p>
         <div className="pretext-width-choices" role="group" aria-label="Diagram width"><span>Reading space</span>{[{ value: 0, label: 'Fit' }, { value: 320, label: '320px' }, { value: 390, label: '390px' }, { value: 760, label: '760px' }].map(item => <button key={item.value} type="button" aria-pressed={requestedWidth === item.value} onClick={() => setRequestedWidth(item.value)}>{item.label}</button>)}</div>
         <label className="pretext-width-slider">Requested width <output>{requestedWidth || availableWidth}px</output><input type="range" min={280} max={900} step={10} value={requestedWidth || Math.min(900, Math.max(280, availableWidth))} onChange={event => setRequestedWidth(Number(event.target.value))}/></label>
         <label className="pretext-comparison"><input type="checkbox" checked={pretextEnabled} onChange={event => setPretextEnabled(event.target.checked)}/>Apply Pretext wrapping <span>Turn off to inspect the unwrapped Mermaid baseline.</span></label>
         <label className="pretext-comparison"><input type="checkbox" checked={fullLabels} onChange={event => setFullLabels(event.target.checked)}/>Full passage labels <span>Default excerpts are literal text from the same reader passage.</span></label>
-        <TextArea label={`Edit the same passage: ${activeChapter.title}`} value={activeChapter.body} maxLength={480} rows={4} onChange={event => editText(event.target.value)}/>
+        <MeasuredTextArea label={`Edit the same passage: ${activeChapter.title}`} value={activeChapter.body} maxLength={480} minRows={3} maxRows={7} onChange={editText}/>
         {plan && <div className="pretext-measurements">
           <p className="pretext-check" role="status">{rendering ? 'Verifying the new SVG…' : !pretextEnabled ? 'Unwrapped baseline: horizontal scrolling is intentional.' : passed ? 'Verified: all 5 labels fit their nodes and the available width.' : verification ? 'The SVG needs a closer look; inspect the measurements below.' : 'Waiting for the rendered SVG.'}</p>
-          <dl><div><dt>Actual reading space</dt><dd>{plan.canvasWidth}px</dd></div><div><dt>Pretext label budget</dt><dd>{plan.labelWidth}px</dd></div><div><dt>Mermaid minNodeWidth</dt><dd>{plan.minNodeWidth}px</dd></div><div><dt>Rendered SVG width</dt><dd>{verification ? `${verification.intrinsicWidth.toFixed(1)}px` : 'Measuring…'}</dd></div><div><dt>Clipped node labels</dt><dd>{verification ? verification.clippedLabels.length : 'Measuring…'}</dd></div><div><dt>New preparations this pass</dt><dd>{plan.preparedThisPass} / 5</dd></div></dl>
+          <dl><div><dt>Actual reading space</dt><dd>{plan.canvasWidth}px</dd></div><div><dt>Pretext label budget</dt><dd>{plan.labelWidth}px</dd></div><div><dt>Mermaid minNodeWidth</dt><dd>{plan.minNodeWidth}px</dd></div><div><dt>Rendered SVG width</dt><dd>{verification ? `${verification.intrinsicWidth.toFixed(1)}px` : 'Measuring…'}</dd></div><div><dt>Clipped node labels</dt><dd>{verification ? verification.clippedLabels.length : 'Measuring…'}</dd></div><div><dt>New preparations this pass</dt><dd>{plan.preparedThisPass}</dd></div></dl>
           <p className="pretext-font-note">{PRETEXT_FONT} · {PRETEXT_LINE_HEIGHT}px line height. Existing prepared text is reused when only width changes.</p>
-          <div className="pretext-metrics-scroll"><table><caption>Actual Pretext output: {plan.labelMode === 'full' ? 'full passage labels' : 'six-word excerpt labels'}</caption><thead><tr><th scope="col">Passage</th><th scope="col">Lines</th><th scope="col">Widest</th><th scope="col">Text height</th></tr></thead><tbody>{plan.nodes.map(node => <tr key={node.id}><th scope="row">{node.title}</th><td>{node.lineCount}</td><td>{node.maxLineWidth.toFixed(1)}px</td><td>{node.predictedHeight.toFixed(1)}px</td></tr>)}</tbody></table></div>
+          <div className="pretext-metrics-scroll"><table><caption>Actual Pretext output: {plan.labelMode === 'full' ? 'full passage labels' : 'three-line measured excerpts'}</caption><thead><tr><th scope="col">Passage</th><th scope="col">Lines</th><th scope="col">Widest</th><th scope="col">Text height</th></tr></thead><tbody>{plan.nodes.map(node => <tr key={node.id}><th scope="row">{node.title}</th><td>{node.lineCount}</td><td>{node.maxLineWidth.toFixed(1)}px</td><td>{node.predictedHeight.toFixed(1)}px</td></tr>)}</tbody></table></div>
           <div className="pretext-source-heading"><h3>Generated Mermaid source</h3><Button variant="ghost" size="sm" onClick={copySource}>{copied ? <Check size={16}/> : <Copy size={16}/>} {copied ? 'Copied' : 'Copy source'}</Button></div>
           {copyError && <p className="pretext-error" role="status">{copyError}</p>}
           <pre className="pretext-source" tabIndex={0} aria-label="Generated Mermaid source"><code>{plan.source}</code></pre>

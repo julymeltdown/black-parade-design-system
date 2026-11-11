@@ -37,14 +37,20 @@ test('phone width changes alter real line breaks rather than scaling an unchange
   assert.equal(wide.labelWidth, 151);
 });
 
-test('compact labels are literal six-word excerpts from the same passage, with an explicit ellipsis', () => {
+test('compact labels use three measured body lines and an explicit ellipsis from the same passage', () => {
   const excerpts = buildMermaidPlan(CHAPTERS, 320, true, 'excerpt');
+  const wider = buildMermaidPlan(CHAPTERS, 390, true, 'excerpt');
   const full = buildMermaidPlan(CHAPTERS, 320, true, 'full');
   for (const [index, node] of excerpts.nodes.entries()) {
-    assert.equal(node.displayedBody, `${node.body.trim().split(/\s+/).slice(0, 6).join(' ')}…`);
+    assert.ok(node.bodyLineCount <= 3, `${node.id}: at most three measured body lines`);
+    assert.ok(node.displayedBody.endsWith('…'));
+    assert.equal(node.truncated, true);
+    assert.ok(node.body.startsWith(node.displayedBody.slice(0, -1).trimEnd()), `${node.id}: literal source prefix`);
     assert.equal(plain(node.lines.map(line => line.text).join('')), plain(`${node.title}${node.displayedBody}`));
+    assert.ok(node.lines.every(line => line.width <= excerpts.labelWidth + .5), `${node.id}: ellipsis fits too`);
     assert.ok(node.lineCount < full.nodes[index].lineCount);
   }
+  assert.ok(wider.nodes.some((node, index) => node.displayedBody.length > excerpts.nodes[index].displayedBody.length), 'a wider budget retains more actual text');
   assert.equal(projectPassage('A short passage.', 'excerpt'), 'A short passage.');
   assert.equal(excerpts.config.layout, 'dagre');
   assert.equal(excerpts.config.look, 'classic');
@@ -54,10 +60,21 @@ test('resizing reuses preparations; editing one passage prepares only that passa
   const unique = CHAPTERS.map(chapter => ({ ...chapter, body: `${chapter.body} Cache-proof specimen.` }));
   const first = buildMermaidPlan(unique, 320);
   const resized = buildMermaidPlan(unique, 390);
-  assert.equal(first.preparedThisPass, 5);
+  assert.ok(first.preparedThisPass >= 5, 'five previously unseen bodies are prepared');
   assert.equal(resized.preparedThisPass, 0);
   const edited = unique.map(chapter => chapter.id === 'loss' ? { ...chapter, body: `${chapter.body} One added sentence.` } : chapter);
   assert.equal(buildMermaidPlan(edited, 390).preparedThisPass, 1);
+});
+
+test('excerpt resizing and full/excerpt switching reuse the same source preparations', () => {
+  const unique = CHAPTERS.map(chapter => ({ ...chapter, body: `${chapter.body} Measured excerpt cache specimen.` }));
+  buildMermaidPlan(unique, 760, true, 'excerpt');
+  for (const width of [320, 390, 280, 760]) {
+    assert.equal(buildMermaidPlan(unique, width, true, 'excerpt').preparedThisPass, 0);
+    assert.equal(buildMermaidPlan(unique, width, true, 'full').preparedThisPass, 0);
+  }
+  const edited = unique.map(chapter => chapter.id === 'memory' ? { ...chapter, body: `${chapter.body} One changed source.` } : chapter);
+  assert.equal(buildMermaidPlan(edited, 390, true, 'excerpt').preparedThisPass, 1);
 });
 
 test('editor content cannot escape its quoted Mermaid label', () => {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { PretextMermaid } from '../components/PretextMermaid';
 import { CHAPTERS, type ChapterId } from '../lib/pretext-mermaid';
 import { tracks } from '../data';
+import { PassageOutline } from '../pretext';
 
 const ALBUM_SOURCE = 'https://music.apple.com/us/album/the-black-parade/1156310650';
 const CONCEPT_SOURCE = 'https://mychemicalromance.warnerrecords.com/products/the-black-parade-20th-anniversary-edition-deluxe-digital-album';
@@ -80,15 +81,13 @@ export function ReadingPage({ watch, selectedId, onSelect, embedded = false }: R
       {embedded && <summary>Read the full essay</summary>}
       <details className="reading-contents reading-measure">
         <summary>On this page</summary>
-        <nav aria-label="Reading contents">
-          <ol>
-            <li><button type="button" onClick={() => goToSection('reading-sleeve')}>The sleeve sets the stage</button></li>
-            <li><button type="button" onClick={() => goToSection('reading-movements')}>Five ways into the record</button></li>
-            {!embedded && <li><button type="button" onClick={() => goToSection('reading-map')}>Follow the connections</button></li>}
-            <li><button type="button" onClick={() => goToSection('reading-film')}>Watch, then return to the page</button></li>
-            <li><button type="button" onClick={() => goToSection('reading-sources')}>Sources and reading notes</button></li>
-          </ol>
-        </nav>
+        <PassageOutline label="Reading contents" onNavigate={goToSection} items={[
+          { id: 'reading-sleeve', label: 'The sleeve sets the stage', href: '#reading-sleeve' },
+          { id: 'reading-movements', label: 'Five ways into the record', href: '#reading-movements' },
+          ...(!embedded ? [{ id: 'reading-map', label: 'Follow the connections', href: '#reading-map' }] : []),
+          { id: 'reading-film', label: 'Watch, then return to the page', href: '#reading-film' },
+          { id: 'reading-sources', label: 'Sources and reading notes', href: '#reading-sources' },
+        ]}/>
       </details>
 
       <article className="reading-article" aria-label="An editorial reading of The Black Parade">

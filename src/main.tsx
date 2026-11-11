@@ -5,6 +5,8 @@ import '@fontsource/bodoni-moda/latin-900.css';
 import '@fontsource/inter/latin-400.css';
 import '@fontsource/inter/latin-500.css';
 import '@fontsource/inter/latin-600.css';
+import '@fontsource-variable/noto-sans-kr';
+import '@fontsource/source-serif-4/latin-400.css';
 import '@fontsource/barlow-condensed/latin-500.css';
 import '@fontsource/barlow-condensed/latin-600.css';
 import App from './App';

@@ -746,3 +746,18 @@ body { font-size: 16px; }
   .hero-actions .ds-button, .hero-actions .text-action { font-size: 11px; }
   .hero-metadata { font-size: 8px; }
 }
+
+/* Working catalog pages put the specimens within reach without a separate nav surface. */
+.system-page--catalog .system-heading { margin-bottom: 20px; gap: 16px; }
+.system-page--catalog .system-heading h1 { font-size: clamp(36px, 4vw, 54px); line-height: 1.1; margin-block: 10px 12px; }
+.system-page--catalog .system-heading h1 br { display: none; }
+.system-page--catalog .system-heading > div > p:last-child { font-size: 14px; }
+.system-page--catalog .download-link { font-size: 14px; }
+@media (max-width: 639px) {
+  .system-page--catalog .system-heading { gap: 12px; }
+  .system-page--catalog .download-link { padding-bottom: 0; border: 0; }
+  .system-page--catalog .download-link span { display: none; }
+}
+
+.system-page > .ds-tab-bar { scrollbar-width: none; }
+.system-page > .ds-tab-bar::-webkit-scrollbar { display: none; }

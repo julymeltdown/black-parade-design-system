@@ -1,5 +1,6 @@
-import { clearCache, layoutWithLines, prepareWithSegments } from '@chenglou/pretext';
-import type { PreparedTextWithSegments } from '@chenglou/pretext';
+import { layoutWithLines } from '@chenglou/pretext';
+import { clampParagraph, getPreparedText, getTextCacheStats, type TextStyle } from './pretext-layout.ts';
+import { ensureTextFonts } from './pretext-fonts.ts';
 import DOMPurify from 'dompurify';
 import type { MermaidConfig } from 'mermaid';
 
@@ -20,40 +21,14 @@ export const NARRATIVE_EDGES = [
   ['loss', 'resolve'], ['theatre', 'resolve'],
 ] as const satisfies readonly (readonly [ChapterId, ChapterId])[];
 
-export const PRETEXT_FONT = '400 16px Inter';
+export const PRETEXT_FONT = '400 16px Inter, "Noto Sans KR Variable", sans-serif';
 export const PRETEXT_LINE_HEIGHT = 17.6; // Mermaid 12.3.0 SVG text uses 1.1em.
+const PRETEXT_STYLE: TextStyle = { font: PRETEXT_FONT, lineHeight: PRETEXT_LINE_HEIGHT, whiteSpace: 'pre-wrap' };
 const NODE_PADDING = 6;
 const GRAPH_PADDING = 6;
 const NODE_SPACING = 16;
 const RANK_SPACING = 22;
-const preparedCache = new Map<string, PreparedTextWithSegments>();
-let preparationCount = 0;
-let fontReady: Promise<void> | undefined;
-
-export async function ensurePretextFont(text: string) {
-  if (!fontReady) {
-    fontReady = (async () => {
-      await document.fonts.load(PRETEXT_FONT, text);
-      await document.fonts.ready;
-      clearCache();
-      preparedCache.clear();
-    })().catch(error => { fontReady = undefined; throw error; });
-  }
-  await fontReady;
-  // An edited passage can request an additional unicode-range subset.
-  await document.fonts.load(PRETEXT_FONT, text);
-}
-
-function cachedPrepare(text: string) {
-  const key = `${PRETEXT_FONT}\u0000${text}`;
-  const previous = preparedCache.get(key);
-  if (previous) return previous;
-  const prepared = prepareWithSegments(text, PRETEXT_FONT, { whiteSpace: 'pre-wrap' });
-  if (preparedCache.size >= 100) preparedCache.delete(preparedCache.keys().next().value!);
-  preparedCache.set(key, prepared);
-  preparationCount += 1;
-  return prepared;
-}
+export function ensurePretextFont(text: string) { return ensureTextFonts([PRETEXT_FONT], text); }
 
 /** Entities keep editor text inside a traditional quoted Mermaid label. */
 export function escapeMermaidLabel(text: string) {
@@ -71,6 +46,9 @@ export interface NodeMeasurement {
   lineCount: number;
   predictedHeight: number;
   maxLineWidth: number;
+  titleLineCount: number;
+  bodyLineCount: number;
+  truncated: boolean;
 }
 
 export interface MermaidPlan {
@@ -90,7 +68,7 @@ export interface MermaidPlan {
 
 export type LabelMode = 'excerpt' | 'full';
 
-/** A literal prefix, not a separately authored or generated summary. */
+/** Legacy v1.2 projection helper; current nodes use a measured three-line budget. */
 export function projectPassage(body: string, labelMode: LabelMode): string {
   if (labelMode === 'full') return body;
   const words = body.trim().split(/\s+/);
@@ -107,11 +85,16 @@ export function buildMermaidPlan(chapters: readonly Chapter[], availableWidth: n
   // Mermaid 12 classic labelHelper and rectangle geometry each add horizontal
   // padding: measured node width is ceil(text width) + 4 * NODE_PADDING.
   const labelWidth = Math.max(64, Math.min(210, Math.floor((canvasWidth - GRAPH_PADDING * 2 - (columns - 1) * spacing - columns * NODE_PADDING * 4 - 12) / columns)));
-  const before = preparationCount;
+  const before = getTextCacheStats().preparations;
   const nodes: NodeMeasurement[] = chapters.map(chapter => {
-    const displayedBody = projectPassage(chapter.body, labelMode);
-    const laidOut = layoutWithLines(cachedPrepare(`${chapter.title}\n${displayedBody}`), labelWidth, PRETEXT_LINE_HEIGHT);
-    return { ...chapter, displayedBody, lines: laidOut.lines.map(line => ({ text: line.text, width: line.width })), lineCount: laidOut.lineCount, predictedHeight: laidOut.height, maxLineWidth: Math.max(0, ...laidOut.lines.map(line => line.width)) };
+    // Keep the original title/body handles across widths. Preparing a combined
+    // width-specific excerpt would repeat Canvas work on every resize.
+    const title = layoutWithLines(getPreparedText(chapter.title, PRETEXT_STYLE), labelWidth, PRETEXT_LINE_HEIGHT);
+    const full = labelMode === 'full' ? layoutWithLines(getPreparedText(chapter.body, PRETEXT_STYLE), labelWidth, PRETEXT_LINE_HEIGHT) : null;
+    const excerpt = full ? null : clampParagraph(chapter.body, labelWidth, 3, PRETEXT_STYLE);
+    const bodyLines = full?.lines ?? excerpt!.lines;
+    const lines = [...title.lines, ...bodyLines].map(line => ({ text: line.text, width: line.width }));
+    return { ...chapter, displayedBody: full ? chapter.body : excerpt!.text, lines, lineCount: lines.length, predictedHeight: lines.length * PRETEXT_LINE_HEIGHT, maxLineWidth: Math.max(0, ...lines.map(line => line.width)), titleLineCount: title.lineCount, bodyLineCount: bodyLines.length, truncated: excerpt?.truncated ?? false };
   });
   const minNodeWidth = pretextEnabled ? Math.ceil(Math.max(...nodes.map(node => node.maxLineWidth))) : 0;
   const source = [
@@ -132,9 +115,10 @@ export function buildMermaidPlan(chapters: readonly Chapter[], availableWidth: n
     theme: 'base',
     look: 'classic',
     layout: 'dagre',
-    themeVariables: { fontFamily: 'Inter', fontSize: '16px', lineColor: '#8b8579', primaryColor: 'transparent', primaryTextColor: '#1c1b18', primaryBorderColor: 'transparent', background: 'transparent' },
+    themeVariables: { fontFamily: 'Inter, "Noto Sans KR Variable", sans-serif', fontSize: '16px', lineColor: '#8b8579', primaryColor: 'transparent', primaryTextColor: '#1c1b18', primaryBorderColor: 'transparent', background: 'transparent' },
     flowchart: { htmlLabels: false, look: 'classic', layout: 'dagre', useMaxWidth: false, wrappingWidth: 10000, minNodeWidth, padding: NODE_PADDING, diagramPadding: GRAPH_PADDING, nodeSpacing: NODE_SPACING, rankSpacing: RANK_SPACING, curve: 'basis' },
   };
+  const preparationCount = getTextCacheStats().preparations;
   return { source, canvasWidth, direction, labelWidth, minNodeWidth, nodePadding: NODE_PADDING, nodes, preparationCount, preparedThisPass: preparationCount - before, pretextEnabled, labelMode, config };
 }
 

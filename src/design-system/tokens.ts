@@ -10,7 +10,7 @@ export const tokens = {
   },
   font: {
     display: "'Bodoni Moda', Georgia, serif",
-    body: "'Inter', system-ui, sans-serif",
+    body: "'Inter', 'Noto Sans KR Variable', system-ui, sans-serif",
     condensed: "'Barlow Condensed', 'Arial Narrow', sans-serif",
   },
   space: [4, 8, 12, 16, 24, 32, 48, 64],

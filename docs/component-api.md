@@ -1,4 +1,6 @@
-# Component API — v1.2
+# Component API — v1.3
+
+11 November 2026 · 28 foundation components · 7 Pretext text components
 
 This document describes the actual React + TypeScript exports in the repository. Examples assume the importing file is inside `src/`; adjust relative paths when moving them. The UI is intended for a browser React application. Rendering a declaration does not make its interaction or validation state automatic: callers own the state described below.
 
@@ -8,11 +10,29 @@ This document describes the actual React + TypeScript exports in the repository.
 import {
   Button, IconButton, Tag, SectionHeading, SearchField, TabBar,
   Dialog, TextField, TextArea, EmptyState, MediaCard, Toast, tokens,
+  Checkbox, Switch, RadioGroup, SelectField, RangeField, Accordion,
+  Breadcrumbs, Pagination, Progress, Avatar, AvatarGroup, Notice,
+  CodeBlock, CopyButton, Skeleton, Kbd,
 } from './design-system';
 import type {
   ButtonProps, IconButtonProps, SearchFieldProps, TabBarProps,
   DialogProps, TextFieldProps, TextAreaProps, MediaCardProps, DesignTokens,
+  CheckboxProps, SwitchProps, RadioGroupProps, SelectFieldProps,
+  RangeFieldProps, AccordionProps, BreadcrumbsProps, PaginationProps,
+  ProgressProps, AvatarProps, AvatarGroupProps, NoticeProps,
+  CodeBlockProps, CopyButtonProps, SkeletonProps, KbdProps,
 } from './design-system';
+
+import {
+  BalancedHeading, TextExcerpt, FlowText, MeasuredTextArea,
+  RichInlineText, MeasuredTextList, PassageOutline,
+  DISPLAY_TEXT, INTERFACE_TEXT, READING_TEXT,
+} from './pretext';
+import type {
+  TextStyle, BalancedHeadingProps, TextExcerptProps, FlowTextProps,
+  MeasuredTextAreaProps, RichInlineTextProps, MeasuredTextListProps,
+  PassageOutlineProps,
+} from './pretext';
 
 import { PretextMermaid, VideoPlayer } from './components';
 import type { PretextMermaidProps, VideoPlayerProps } from './components';
@@ -20,11 +40,15 @@ import { ReadingPage } from './pages/Reading';
 import type { ReadingPageProps } from './pages/Reading';
 ```
 
-`src/design-system/index.ts` loads `tokens.css` and `components.css`. Product components load their scoped CSS. `ReadingPage` additionally requires the host to import `src/reading.css`, as `src/main.tsx` does. Load the local Fontsource families from `src/main.tsx`; **Inter 400 must be available for Pretext's 16px measurement contract**. The serif body styles in the reader use system fallbacks and do not require a remote font request.
+`src/design-system/index.ts` loads `tokens.css`, `components.css` and `extended.css`. The separate `src/pretext/index.ts` loads `pretext.css`; importing it alone does not load foundation tokens or fonts. Product components load their scoped CSS. `ReadingPage` additionally requires the host to import `src/reading.css`, as `src/main.tsx` does. Load the local Fontsource imports from that entry point: Bodoni Moda 700/900, Inter 400/500/600, Source Serif 4 400, Barlow Condensed 500/600 and Noto Sans KR Variable. The diagram measures **Inter 400 at 16px with the Noto Sans KR fallback**. Text components request the actual text's glyph subsets before measurement. Their reading preset uses bundled Source Serif 4; the separate longform reader retains Georgia.
 
 `tokens` is a deeply literal `as const` object. Its `color`, `font`, `space`, `radius`, `target`, `motion`, `breakpoint` and `layer` fields describe the foundation. `DesignTokens` is `typeof tokens`. CSS variables are the runtime styling interface; changing the TypeScript object alone does not change `tokens.css`.
 
-## 2. All twelve foundation components
+## 2. All 28 foundation components
+
+The original twelve exports retain their public contracts. The sixteen additions are implemented in `extended.tsx`; they use the same tokens and native controls. Open `/#system?section=components` for the live gallery.
+
+### Original twelve
 
 | Component | Required props | Optional props and defaults | Contract |
 | --- | --- | --- | --- |
@@ -41,7 +65,7 @@ import type { ReadingPageProps } from './pages/Reading';
 | `MediaCard` | `title: string`; `subtitle: string`; `image: string`; `onClick: () => void` | `duration?: string` | A button with a 16:9 image and caption. Its accessible name identifies the watch action. `onClick` opens the player or other host behavior; it does not play media itself. |
 | `Toast` | `message: string`; `onDismiss: () => void` | None | Polite status plus a dismiss button. The host controls visibility and any timeout; this component does not auto-dismiss. |
 
-Eight named props interfaces are exported by the foundation barrel. For the four components with inline prop types, infer their exact contract instead of maintaining a duplicate:
+The original twelve components export eight named props interfaces. Each of the sixteen additions has a named props interface as well. For the four original components with inline prop types, infer their exact contract instead of maintaining a duplicate:
 
 ```tsx
 import type { ComponentProps } from 'react';
@@ -52,6 +76,29 @@ type SectionHeadingProps = ComponentProps<typeof SectionHeading>;
 type EmptyStateProps = ComponentProps<typeof EmptyState>;
 type ToastProps = ComponentProps<typeof Toast>;
 ```
+
+### Sixteen additions in v1.3
+
+| Component | Required props | Additional contract |
+| --- | --- | --- |
+| `Checkbox` | `label`, `checked`, `onCheckedChange(boolean)` | Native checkbox; optional `indeterminate`, `description`, `error` and native attributes. Mixed state uses the real DOM property. |
+| `Switch` | `label`, `checked`, `onCheckedChange(boolean)` | Native checkbox with switch semantics, a stable visible label and native disabled behavior. |
+| `RadioGroup` | `label`, `options`, `value`, `onValueChange(string)` | Native fieldset, legend and radio group. Options have `value`, `label`, optional `description`/`disabled`. Supports `name`, `required`, `disabled`, description/error and `inline`. |
+| `SelectField` | `label`, `options`, `value`, `onValueChange(string)` | Native single select; options have `value`, `label`, optional `disabled`. Optional placeholder, description/error and native select attributes. |
+| `RangeField` | `label`, `value`, `onValueChange(number)` | Native range, defaults `min=0`, `max=100`, `step=1`. Clamps finite values; optional `formatValue` supplies both visible and accessible value text. |
+| `Accordion` | `items` | Real details/summary. Items have `id`, `title`, `content`, optional `disabled`. Use controlled `openIds`/`onOpenChange` or `defaultOpenIds`; `multiple=false` by default. |
+| `Breadcrumbs` | `items` | Named nav and ordered list; earlier `href` items are links, the final item exposes `aria-current="page"`. Each item has a label and optional href. |
+| `Pagination` | `page`, `pageCount`, `onPageChange(number)` | One-based controlled page; bounded numbers and disabled ends. An empty set disables movement and announces no pages. Optional `label` and `disabled`. |
+| `Progress` | `label` | Native progress. Optional finite `value` is clamped against `max=100`; absent or nonfinite value is indeterminate with no `value`/`aria-valuenow`. Optional `valueText`, `showValue`. |
+| `Avatar` | `name` | Initials by default; optional `src` falls back to initials on an image error. `size='sm' \| 'md' \| 'lg'`, default `md`. |
+| `AvatarGroup` | `people` | Each person is an `AvatarProps` record. Defaults `max=4`, `label='Contributors'`; remaining names stay in the overflow count's accessible label. |
+| `Notice` | `title` | Optional `children`; `tone='info' \| 'success' \| 'warning' \| 'error'`, default info. Status/alert semantics and optional `onDismiss`; the caller owns visibility. |
+| `CodeBlock` | `code` | Escaped text in a focusable, scrollable pre/code region; optional `label`, `language`, `copyable=true`, `wrap=false`. No syntax parser or HTML injection. |
+| `CopyButton` | `text` | User-triggered Clipboard API with pending, copied and visible failure feedback. Optional `label`, `copiedLabel`, `onCopy`; the completion callback is not a native clipboard event. |
+| `Skeleton` | None | Static placeholder with a status label. Defaults `lines=3`, `lastLineWidth='62%'`; line count bounded to 1–12. Does not animate or fetch. |
+| `Kbd` | Native kbd contents/attributes | Semantic keyboard label. Does not register a shortcut or become a button. |
+
+All component props and option types are exported from the foundation barrel, including `RadioOption`, `SelectOption`, `AccordionItem`, `BreadcrumbItem` and `NoticeTone`. The [extended-component reference](extended-components.md) contains exact types, complete examples and each component's controlled/uncontrolled rules. Form errors are associated with their controls; callers still own validation and submission. Active controls retain 44px targets and mobile form text remains at least 16px.
 
 ### Actions, labels and content
 
@@ -138,6 +185,61 @@ export function NoteComposer() {
 
 Validation, persistence and submission belong to the caller. The above example deliberately performs no network request.
 
+## Pretext text components
+
+The seven exports in `src/pretext` are a separate composition layer. They use the shared engine in [`src/lib/pretext-layout.ts`](../src/lib/pretext-layout.ts) and the font/environment lifecycle in [`src/lib/pretext-fonts.ts`](../src/lib/pretext-fonts.ts). They do not import page data. Open `/#system?section=pretext` for editable specimens.
+
+```ts
+type TextStyle = {
+  font: string;        // Canvas/CSS font shorthand; include intended fallbacks
+  lineHeight: number;  // positive pixel value, used during layout
+  letterSpacing?: number; // finite pixels, default 0
+  whiteSpace?: 'normal' | 'pre-wrap'; // default normal
+  wordBreak?: 'normal' | 'keep-all';  // default normal
+};
+```
+
+| Export | Required props | Defaults and behavior |
+| --- | --- | --- |
+| `BalancedHeading` | `text` | `as='h2'`, `textStyle=DISPLAY_TEXT`, `align='start'`. A width search preserves the original line count. The DOM remains one native heading. |
+| `TextExcerpt` | `text` | `maxLines=3`, `textStyle=READING_TEXT`, `defaultExpanded=false`. Reserves ellipsis width and paints the fitted lines as selectable spans inside one paragraph. Expansion restores the full native paragraph; `moreLabel`/`lessLabel` customize its button. |
+| `FlowText` | `text`, `inset` | Inset has `src`, `alt`, `width`, `height`, optional `side='right'`, `gap=20`. `textStyle=READING_TEXT`. Uses one cursor through varying line widths; narrow or bidi text returns to ordinary image-plus-paragraph flow. |
+| `MeasuredTextArea` | `label`, `value`, `onChange(string)` | `textStyle=INTERFACE_TEXT`, `minRows=3`, `maxRows=8`. Native textarea attributes pass through except value/defaultValue/onChange/rows/style. Optional `hint`/`error`; normalized newlines and a final caret line contribute to its height. |
+| `RichInlineText` | `items` | `lineHeight=28`. Each run has `text`, `font`, optional `kind`, `atomic`, `paddingInline`, `letterSpacing`. Uses `@chenglou/pretext/rich-inline` preparation, range walking and fragment materialization. |
+| `MeasuredTextList` | `items` | Items have `id` and `text`. `height=360`, `virtualized=false`, `overscan=120`, `textStyle=INTERFACE_TEXT`. Optional windowing includes a complete-content mode for find and selection. Stable IDs retain the visible row across resize. |
+| `PassageOutline` | `items` | Items have `id`, `label`, `href`, optional `detail`. Optional `currentId`, `onNavigate(id)`; default `label='On this page'`, `textStyle=INTERFACE_TEXT`. Normal anchors with measured minimum heights and `aria-current="location"`. |
+
+All seven accept `className`. Named props types are exported along with `FlowTextInset`, `RichInlineRun`, `MeasuredListItem` and `OutlineItem`. Do not replace one component's string callback with a DOM-event handler: `MeasuredTextArea.onChange(value)` differs from the original `TextArea.onChange(event)`.
+
+The style presets are `DISPLAY_TEXT` (700 40px Bodoni Moda, 46px line height), `READING_TEXT` (400 18px Source Serif 4, 30px line height) and `INTERFACE_TEXT` (400 16px Inter, 26px line height). All include Noto Sans KR Variable in the fallback stack. `textStyleToCss(style)` applies the same measurement contract to native text. `useContentWidth` observes the element's content box; `useTextEnvironment` exposes font readiness, environment revision and loading errors. Neither is a general rendered-text measurement hook.
+
+```tsx
+import { useState } from 'react';
+import { BalancedHeading, MeasuredTextArea, TextExcerpt, INTERFACE_TEXT } from './pretext';
+
+export function MeasuredNote() {
+  const [body, setBody] = useState('A small piano phrase opens into a shared procession.');
+
+  return <section>
+    <BalancedHeading text="A listening note, in your words." as="h2" />
+    <MeasuredTextArea label="Your note" value={body} onChange={setBody}
+      minRows={3} maxRows={8} maxLength={2000}
+      hint="This example keeps the draft in component state." />
+    <TextExcerpt text={body} textStyle={INTERFACE_TEXT} maxLines={3} />
+  </section>;
+}
+```
+
+### Preparation, invalidation and measurement states
+
+The shared engine holds **512 prepared plain-text entries** by default, with LRU eviction. Its key is `[font, letterSpacing, whiteSpace, wordBreak, originalText]`. Width and **line height are not preparation inputs**. Changing them reuses a prepared handle and recomputes layout; changing source or a shaping option may prepare another entry. Rich-inline runs keep a separate memoized prepared handle, so the plain-text cache counters do not count rich-inline preparation.
+
+`ensureTextFonts(fonts, actualText)` loads the specific glyph subsets required by the content. The shared lifecycle watches loaded font faces/subsets, `document.documentElement.lang` and device pixel ratio. Actual changes clear both the application cache and Pretext's internal cache, increment a revision and notify mounted consumers. A container resize alone does not clear prepared entries. `setLocale` is managed globally from the document language; components should not set competing local locales.
+
+Each component exposes `data-pretext-state="measured"` or `"native"`. These distinguish a usable measured plan from a native presentation while measurement is unavailable or unsuitable; they are not test-pass badges. Before fonts or container width are ready, text remains in the DOM. Arabic, Hebrew and explicit bidi-control samples use native paragraph ordering where manual line painting or truncation would alter it. A measured plan is a prediction: browser font shaping and rendered fit still need separate checks.
+
+See [Pretext component APIs](pretext-components.md) for complete props and fallback rules, [layout engine](pretext-layout-engine.md) for algorithms and measurement limits, and [provenance](pretext-provenance.md) for upstream sources. Community uses `MeasuredTextArea` for composing/replying and `TextExcerpt` for post previews; Reading uses `PassageOutline` for contents. The current verification record identifies the product flows actually exercised.
+
 ## 3. `PretextMermaid`
 
 ```ts
@@ -184,9 +286,9 @@ export function SynchronizedPassage() {
 }
 ```
 
-The built-in passage editor has a 480-character limit. Edits are local unless the parent explicitly persists them. Width controls are bounded by the actual available space. A `ResizeObserver` triggers relayout; font-ready cached Pretext preparation is reused when only width changes. Pretext supplies label lines and measured minimum node width; Mermaid supplies graph geometry. Mermaid loads on demand. The rendered SVG is sanitized before insertion.
+The built-in passage editor uses `MeasuredTextArea` with a 480-character limit. Edits are local unless the parent explicitly persists them. Width controls are bounded by the actual available space. A `ResizeObserver` triggers relayout. The default rendered node shows its complete title plus **up to three measured body lines**, reserving ellipsis width on the final line. Title and complete body have independent handles in the shared 512-entry preparation cache, reused across widths and label modes. Pretext supplies label lines and measured minimum node width; Mermaid supplies graph geometry. Mermaid loads on demand. The rendered SVG is sanitized before insertion.
 
-The evidence disclosure exposes generated source, line counts, measured widths/heights, preparation counts and actual browser SVG containment checks. The unwrapped comparison intentionally permits horizontal scrolling. It is a diagnostic baseline, not an alternative accessible mobile layout. Rendering failures display an error; keep ordinary readable prose alongside the graph, as `ReadingPage` does.
+The evidence disclosure exposes generated source, line counts, measured widths/heights, preparation counts and actual browser SVG containment checks. Its full-passage checkbox restores every body word in the labels. The low-level `buildMermaidPlan` function retains `labelMode='full'` as its default for complete-text callers; the React host explicitly requests `'excerpt'` initially. The unwrapped comparison intentionally permits horizontal scrolling. Rendering failures display an error; keep ordinary readable prose alongside the graph, as `ReadingPage` does. See the [integration proof](pretext-mermaid-proof.md).
 
 ## 4. `ReadingPage`
 
@@ -262,6 +364,6 @@ This is **web-page miniplayer behavior**, not a native browser PiP API. Playback
 
 ## 6. Verification and redistribution
 
-Use the root commands documented in [README.md](../README.md): `npm run typecheck`, `npm run test:pretext` and `npm run build`. The adapter test suite concerns real font measurement, wrapping and preparation reuse; browser SVG geometry, pointer/keyboard interaction, iframe continuity and physical-device behavior need their own observation. Consult [verification.md](verification.md) for the checks actually completed.
+Use the root commands documented in [README.md](../README.md): `npm run typecheck`, `npm run test:pretext` and `npm run build`. The test command runs both the layout-engine and Mermaid-adapter suites with real Canvas font metrics. Browser SVG geometry, native/manual text presentation, pointer/keyboard interaction, iframe continuity and physical-device behavior need their own observation. Consult [verification-v1.3.md](verification-v1.3.md) for the current results. [verification.md](verification.md), its JSON companion and the original six screenshots are **historical v1.2 evidence**, not checks of these additions.
 
-When redistributing the adapted reader styles or player structure, include the relevant complete notices from `docs/vendor/` and the pinned-source provenance documents. Those software permissions do not license the user-supplied album artwork, photographs, artist identity or external videos.
+When redistributing the adapted reader styles, player structure or Pretext-based patterns, include the relevant complete notices from `docs/vendor/` and the [reading](reading-provenance.md), [video](video-provenance.md) and [Pretext](pretext-provenance.md) provenance documents. Those software permissions do not license the user-supplied album artwork, photographs, artist identity or external videos.
